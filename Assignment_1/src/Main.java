@@ -23,6 +23,8 @@ public class Main {
 
         getLUDecompositionNoPivoting(matrixA);
 
+        interchangeRows(getIdentityMatrix(3), 0, 2);
+
 
         inputA.close();
         inputB.close();
@@ -63,8 +65,11 @@ public class Main {
             }
 
         }
-        printMatrix(U);
+        System.out.printf("\nLower Triangular Matrix (L);");
         printMatrix(L);
+        System.out.printf("\nUpper Triangular Matrix (U);");
+        printMatrix(U);
+
 
     }
 
@@ -73,6 +78,15 @@ public class Main {
         for (int i = 0; i < rowIndex; i++)
             total += L[rowIndex][i] * U[i][colIndex];
         return total;
+    }
+
+    private static void interchangeRows(int[][] a, int row1, int row2){
+        int[] temp = a[row1];
+        a[row1] = a[row2];
+        a[row2] = temp;
+
+        System.out.print("\nRow-Interchanged Matrix;");
+        printMatrix(a);
     }
 
 
