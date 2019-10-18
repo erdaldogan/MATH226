@@ -21,6 +21,7 @@ public class Main {
                 matrixB[i][j] = inputB.nextInt();
         }
 
+        getLUDecompositionNoPivoting(matrixA);
 
 
         inputA.close();
@@ -45,10 +46,42 @@ public class Main {
         return output;
     }
 
-    //private static int[] getColumn(int[][] x, int colIndex){
-      //  int[] output = new int[x[0].length];
+    private static void getLUDecompositionNoPivoting(int[][] a){
+        int rowCount = a.length, colCount = a[0].length;
+        if (rowCount != colCount)
+            throw new IllegalArgumentException("Input must be a square matrix!");
+        int[][] L = getIdentityMatrix(rowCount);
+        int[][] U = new int[rowCount][colCount];
+        U[0] = a[0].clone();
+        for (int i = 1; i < rowCount; i++){
+            L[i][0] = a[i][0] / U[0][0];
+            for (int j = 1; j < colCount; j++){
+                if (i <= j)
+                    U[i][j] = a[i][j] - getSigmaSum(L, U, i, j);
+                else
+                    L[i][j] = (a[i][j] - getSigmaSum(L, U, i, j)) / U[j][j];
+            }
 
-    //}
+        }
+        printMatrix(U);
+        printMatrix(L);
+
+    }
+
+    private static int getSigmaSum(int[][] L, int[][] U, int rowIndex, int colIndex){
+        int total = 0;
+        for (int i = 0; i < rowIndex; i++)
+            total += L[rowIndex][i] * U[i][colIndex];
+        return total;
+    }
+
+
+    private static int[][] getIdentityMatrix(int len){
+        int[][] output = new int[len][len];
+        for (int i = 0; i < len; i++)
+            output[i][i] = 1;
+        return output;
+    }
 
     private static void printMatrix(int[][] matrix){
         System.out.print("\n");
