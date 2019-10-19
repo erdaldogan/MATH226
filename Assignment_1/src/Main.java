@@ -1,3 +1,10 @@
+//-----------------------------------------//
+// MATH226 - Numerical Methods for EE
+// Project 01
+//
+// Name-Surname: Erdal Sidal Dogan
+// Student ID: 041702023
+//-----------------------------------------//
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Scanner;
@@ -10,6 +17,17 @@ public class Main {
         int[] dimensionsB = {inputB.nextInt(), inputB.nextInt()};
         double[][] matrixA = new double[dimensionsA[0]][dimensionsA[1]];
         double[][] matrixB = new double[dimensionsB[0]][dimensionsB[1]];
+
+        /**
+        int row = 0;
+        while(inputA.hasNextLine())
+            matrixA[row] = getArrayOfDoubles(inputA.nextLine().split("\\s+"));
+        row = 0;
+        while (inputB.hasNextLine())
+            matrixB[row] = getArrayOfDoubles(inputB.nextLine().split("\\s+"));
+
+        System.gc();
+        */
 
         for (int i = 0; i < dimensionsA[0]; i++){
             for (int j = 0; j < dimensionsA[1]; j++)
@@ -28,22 +46,20 @@ public class Main {
         inputB.close();
 
     }
-    private static double[][] matrixMultiplication(double[][] a, double[][] b) throws IllegalArgumentException {
-        int rowCountA = a.length, rowCountB = b.length,
-                colCountA = a[0].length, colCountB = b[0].length;
-        if (colCountA != rowCountB)
-            throw new IllegalArgumentException("These two matrices cannot be multiplied!\n" +
-                    "Number of columns of the first matrix must be equal to number of rows of the second matrix!");
 
-        double[][] output = new double[rowCountA][colCountB];
-        for(int i = 0; i < rowCountA; i++){
-            for (int j = 0; j < colCountB; j++){
-                for (int k = 0; k < colCountA; k++){
-                    output[i][j] += a[i][k] * b[k][j];
-                }
-            }
-        }
-        return output;
+    private static double[] getForwardSubstitutionSolutionVector(double[][] L, double[] b){
+        int rowCount = L.length, colCount = L[0].length;
+        double[] y = new double[rowCount];
+        y[0] = b[0];
+        for (int i = 1; i < rowCount; i++)
+            y[i] = b[i] - getSigmaSumForFWSubstitution(L, y, i);
+        return y;
+    }
+
+    private static double[] getBackwardSubstitutionSolutionVector(double[][] U, double[] y){
+        int rowCount = U.length, colCount = U[0].length;
+        double[] x = new double[rowCount];
+
     }
 
     private static void getLUDecompositionNoPivoting(double[][] a){
@@ -57,16 +73,16 @@ public class Main {
             L[i][0] = a[i][0] / U[0][0];
             for (int j = 1; j < colCount; j++){
                 if (i <= j)
-                    U[i][j] = a[i][j] - getSigmaSum(L, U, i, j);
+                    U[i][j] = a[i][j] - getSigmaSumForCalculatingL(L, U, i, j);
                 else
-                    L[i][j] = (a[i][j] - getSigmaSum(L, U, i, j)) / U[j][j];
+                    L[i][j] = (a[i][j] - getSigmaSumForCalculatingL(L, U, i, j)) / U[j][j];
             }
         }
-        System.out.printf("\nLower Triangular Matrix (L);");
+        System.out.print("\nLower Triangular Matrix (L);");
         printMatrix(L);
-        System.out.printf("\nUpper Triangular Matrix (U);");
+        System.out.print("\nUpper Triangular Matrix (U);");
         printMatrix(U);
-        System.out.printf("\n(LU);");
+        System.out.print("\n(LU);");
         printMatrix(matrixMultiplication(L,U));
 
     }
@@ -120,17 +136,42 @@ public class Main {
         printMatrix(matrixMultiplication(P, a));
     }
 
-    private static double getSigmaSum(double[][] L, double[][] U, int rowIndex, int colIndex){
+    private static double[][] matrixMultiplication(double[][] a, double[][] b) throws IllegalArgumentException {
+        int rowCountA = a.length, rowCountB = b.length,
+                colCountA = a[0].length, colCountB = b[0].length;
+        if (colCountA != rowCountB)
+            throw new IllegalArgumentException("These two matrices cannot be multiplied!\n" +
+                    "Number of columns of the first matrix must be equal to number of rows of the second matrix!");
+
+        double[][] output = new double[rowCountA][colCountB];
+        for(int i = 0; i < rowCountA; i++){
+            for (int j = 0; j < colCountB; j++){
+                for (int k = 0; k < colCountA; k++){
+                    output[i][j] += a[i][k] * b[k][j];
+                }
+            }
+        }
+        return output;
+    }
+
+    private static double getSigmaSumForCalculatingL(double[][] L, double[][] U, int rowIndex, int colIndex){
         int total = 0;
         for (int i = 0; i < rowIndex; i++)
             total += L[rowIndex][i] * U[i][colIndex];
         return total;
     }
 
+    private static double getSigmaSumForFWSubstitution(double[][] L, double[] y, int index){ // index of x
+        double sum = 0;
+        for (int i = 0; i < index - 1; i++)
+            sum += L[index][i] * y[i];
+        return sum;
+    }
+
     private static void interchangeRows(double[][] a, int row1, int row2){
-        if (row1 == row2){}
+        if (row1 == row2){} // do nothing
         else {
-            double[] temp = a[row1];
+            double[] temp = a[row1]; // basic variable swapping
             a[row1] = a[row2];
             a[row2] = temp;
         }
@@ -151,4 +192,16 @@ public class Main {
             System.out.print("\n");
         }
     }
+    /*
+    private static double[] getArrayOfDoubles(String[] strings){
+        int length = strings.length;
+        double[] output = new double[length];
+        for (int i = 0; i < length; i++)
+            output[i] = Double.parseDouble(strings[i]);
+        return output;
+    }
+     */
 }
+
+// Is it okay to have dimensions given at the beginning of the input files
+// For partial pivoting; PA=PLU or A=LU
