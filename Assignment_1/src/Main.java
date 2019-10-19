@@ -11,12 +11,12 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) throws FileNotFoundException {
-        Scanner inputA = new Scanner(new File("A.txt"));
-        Scanner inputB = new Scanner(new File("B.txt"));
+        Scanner inputA = new Scanner(new File("input_data/A.txt"));
+        Scanner inputB = new Scanner(new File("input_data/B.txt"));
         int[] dimensionsA = {inputA.nextInt(), inputA.nextInt()};
-        int[] dimensionsB = {inputB.nextInt(), inputB.nextInt()};
+        int lengthB = inputB.nextInt();
         double[][] matrixA = new double[dimensionsA[0]][dimensionsA[1]];
-        double[][] matrixB = new double[dimensionsB[0]][dimensionsB[1]];
+        double[] matrixB = new double[lengthB];
 
         /**
         int row = 0;
@@ -34,41 +34,42 @@ public class Main {
                 matrixA[i][j] = inputA.nextDouble();
         }
 
-        for (int i = 0; i < dimensionsB[0]; i++){
-            for (int j = 0; j < dimensionsB[1]; j++)
-                matrixB[i][j] = inputB.nextDouble();
+        for (int i = 0; i < lengthB; i++){
+                matrixB[i] = inputB.nextDouble();
         }
-
-        double[][] matrixL = getLUDecompositionNoPivoting(matrixA)[0];
-        double[][] matrixU = getLUDecompositionNoPivoting(matrixA)[1];
-
-        System.out.println("There she iss!");
-        printMatrix(matrixU);
-
-
         inputA.close();
         inputB.close();
 
+        System.out.print("A matrix");
+        printMatrix(matrixA);
+        System.out.print("B vector");
+        printVector(matrixB);
+
+        solveSystem(matrixA, matrixB);
+
+
     }
 
-    private static double[] getForwardSubstitutionSolutionVector(double[][] L, double[] b){
-        int rowCount = L.length, colCount = L[0].length;
-        double[] y = new double[rowCount];
-        y[0] = b[0];
-        for (int i = 1; i < rowCount; i++)
-            y[i] = b[i] - getSigmaSumForFWSubstitution(L, y, i);
-        return y;
+    private static void solveSystem(double[][] A, double[] b){
+        double[][] L = getLUDecompositionNoPivoting(A)[0];
+        double[][] U = getLUDecompositionNoPivoting(A)[1];
+
+        double[] y = getForwardSubstitutionSolutionVector(L, b);
+        double[] x = getBackwardSubstitutionSolutionVector(U, y);
+
+        System.out.print("\nLower Triangular Matrix (L);");
+        printMatrix(L);
+        System.out.print("\nUpper Triangular Matrix (U);");
+        printMatrix(U);
+        System.out.print("\n(LU);");
+        printMatrix(matrixMultiplication(L,U));
+
+        printResultVector(x);
+
     }
 
-    private static double[] getBackwardSubstitutionSolutionVector(double[][] U, double[] y){
-        int rowCount = U.length, colCount = U[0].length;
-        double[] x = new double[rowCount];
-        int lastIndex = rowCount - 1;
-        x[lastIndex] = y[lastIndex] / U[lastIndex][lastIndex];
-        for (int i = lastIndex - 1; i >= 0; i--)
-            x[i] = (y[i] - getSigmaSumForBWSubstitution(U, x, i)) / U[i][i];
-        return x;
-    }
+
+
 
     private static double[][][] getLUDecompositionNoPivoting(double[][] a){
         int rowCount = a.length, colCount = a[0].length;
@@ -87,12 +88,15 @@ public class Main {
                     L[i][j] = (a[i][j] - getSigmaSumForCalculatingL(L, U, i, j)) / U[j][j];
             }
         }
+
+        /*
         System.out.print("\nLower Triangular Matrix (L);");
         printMatrix(L);
         System.out.print("\nUpper Triangular Matrix (U);");
         printMatrix(U);
         System.out.print("\n(LU);");
         printMatrix(matrixMultiplication(L,U));
+        */
 
         output[0] = L;
         output[1] = U;
@@ -139,6 +143,7 @@ public class Main {
         output[0] = L;
         output[1] = U;
 
+        /*
         System.out.println("P Matrix");
         printMatrix(P);
         System.out.println("L Matrix;");
@@ -151,7 +156,7 @@ public class Main {
 
         System.out.println("PA;");
         printMatrix(matrixMultiplication(P, a));
-
+        */
         return output;
     }
 
@@ -180,11 +185,40 @@ public class Main {
         return total;
     }
 
+    private static double[] getForwardSubstitutionSolutionVector(double[][] L, double[] b){
+        int rowCount = L.length, colCount = L[0].length;
+        if (rowCount != colCount)
+            throw new IllegalArgumentException("Lower Triangular matrix must be square!");
+        if (colCount != b.length)
+            throw new IllegalArgumentException("b vector has inappropriate size!");
+        double[] y = new double[rowCount];
+        y[0] = b[0] / L[0][0];
+        for (int i = 1; i < rowCount; i++)
+            y[i] = (b[i] - getSigmaSumForFWSubstitution(L, y, i)) / L[i][i];
+        return y;
+    }
+
     private static double getSigmaSumForFWSubstitution(double[][] L, double[] y, int index){ // index of x
         double sum = 0;
-        for (int i = 0; i < index - 1; i++)
+        for (int i = 0; i < index; i++)
             sum += L[index][i] * y[i];
+
         return sum;
+    }
+
+    private static double[] getBackwardSubstitutionSolutionVector(double[][] U, double[] y){
+        int rowCount = U.length, colCount = U[0].length;
+        if (rowCount != colCount)
+            throw new IllegalArgumentException("Lower Triangular matrix must be square!");
+        if (colCount != y.length)
+            throw new IllegalArgumentException("b vector has inappropriate size!");
+
+        double[] x = new double[rowCount];
+        int lastIndex = rowCount - 1;
+        x[lastIndex] = y[lastIndex] / U[lastIndex][lastIndex];
+        for (int i = lastIndex - 1; i >= 0; i--)
+            x[i] = (y[i] - getSigmaSumForBWSubstitution(U, x, i)) / U[i][i];
+        return x;
     }
 
     private static double getSigmaSumForBWSubstitution(double[][] U, double[] x, int index){
@@ -192,6 +226,7 @@ public class Main {
         double sum = 0;
         for (int i = index + 1; i < rowCount; i++)
             sum += U[index][i] * x[i];
+
         return sum;
     }
 
@@ -214,10 +249,26 @@ public class Main {
     private static void printMatrix(double[][] matrix){
         System.out.print("\n");
         for (double[] row: matrix){
-            for (double index: row)
-                System.out.printf("%10.2f", index);
+            for (double element: row)
+                System.out.printf("%10.2f", element);
             System.out.print("\n");
         }
+    }
+
+    private static void printVector(double[] vector){
+        System.out.print("\n");
+        for (double num: vector)
+            System.out.printf("%10.2f \n", num);
+        System.out.print("\n");
+
+    }
+
+    private static void printResultVector(double[] vector){
+        int len = vector.length;
+        System.out.print("\nResult Vector\n");
+        for (int i = 0; i < len; i++)
+            System.out.printf("x%1d = %7.2f\n", i, vector[i]);
+
     }
     /*
     private static double[] getArrayOfDoubles(String[] strings){
