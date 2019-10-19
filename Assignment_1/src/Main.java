@@ -39,7 +39,11 @@ public class Main {
                 matrixB[i][j] = inputB.nextDouble();
         }
 
-        getLUDecompositionPartialPivoting(matrixA);
+        double[][] matrixL = getLUDecompositionNoPivoting(matrixA)[0];
+        double[][] matrixU = getLUDecompositionNoPivoting(matrixA)[1];
+
+        System.out.println("There she iss!");
+        printMatrix(matrixU);
 
 
         inputA.close();
@@ -59,15 +63,20 @@ public class Main {
     private static double[] getBackwardSubstitutionSolutionVector(double[][] U, double[] y){
         int rowCount = U.length, colCount = U[0].length;
         double[] x = new double[rowCount];
-
+        int lastIndex = rowCount - 1;
+        x[lastIndex] = y[lastIndex] / U[lastIndex][lastIndex];
+        for (int i = lastIndex - 1; i >= 0; i--)
+            x[i] = (y[i] - getSigmaSumForBWSubstitution(U, x, i)) / U[i][i];
+        return x;
     }
 
-    private static void getLUDecompositionNoPivoting(double[][] a){
+    private static double[][][] getLUDecompositionNoPivoting(double[][] a){
         int rowCount = a.length, colCount = a[0].length;
         if (rowCount != colCount)
             throw new IllegalArgumentException("Input must be a square matrix!");
         double[][] L = getIdentityMatrix(rowCount);
         double[][] U = new double[rowCount][colCount];
+        double[][][] output = new double[2][rowCount][rowCount];
         U[0] = a[0].clone();
         for (int i = 1; i < rowCount; i++){
             L[i][0] = a[i][0] / U[0][0];
@@ -85,13 +94,17 @@ public class Main {
         System.out.print("\n(LU);");
         printMatrix(matrixMultiplication(L,U));
 
+        output[0] = L;
+        output[1] = U;
+        return output;
+
     }
 
-    private static void getLUDecompositionPartialPivoting(double[][] a){
+    private static double[][][] getLUDecompositionPartialPivoting(double[][] a){
         int rowCount = a.length, colCount = a[0].length; // number of rows, number of columns i.e. dimensions
         if (rowCount != colCount) // if input is not square matrix
             throw new IllegalArgumentException("Input must be a square matrix!");
-
+        double[][][] output = new double[2][rowCount][rowCount];
         double[][] P = getIdentityMatrix(rowCount); // permutation matrix
         double[][] L = getIdentityMatrix(rowCount); // lower triangular matrix
         double[][] U = new double[rowCount][colCount]; // upper triangular matrix
@@ -122,6 +135,10 @@ public class Main {
                     U[k][l] = U[k][l] - (factor * U[i][l]);
             }
         }
+
+        output[0] = L;
+        output[1] = U;
+
         System.out.println("P Matrix");
         printMatrix(P);
         System.out.println("L Matrix;");
@@ -134,6 +151,8 @@ public class Main {
 
         System.out.println("PA;");
         printMatrix(matrixMultiplication(P, a));
+
+        return output;
     }
 
     private static double[][] matrixMultiplication(double[][] a, double[][] b) throws IllegalArgumentException {
@@ -165,6 +184,14 @@ public class Main {
         double sum = 0;
         for (int i = 0; i < index - 1; i++)
             sum += L[index][i] * y[i];
+        return sum;
+    }
+
+    private static double getSigmaSumForBWSubstitution(double[][] U, double[] x, int index){
+        int rowCount = U.length;
+        double sum = 0;
+        for (int i = index + 1; i < rowCount; i++)
+            sum += U[index][i] * x[i];
         return sum;
     }
 
