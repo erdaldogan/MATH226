@@ -61,12 +61,13 @@ public class Main {
                 else
                     L[i][j] = (a[i][j] - getSigmaSum(L, U, i, j)) / U[j][j];
             }
-
         }
         System.out.printf("\nLower Triangular Matrix (L);");
         printMatrix(L);
         System.out.printf("\nUpper Triangular Matrix (U);");
         printMatrix(U);
+        System.out.printf("\n(LU);");
+        printMatrix(matrixMultiplication(L,U));
 
     }
 
@@ -95,8 +96,8 @@ public class Main {
                     L[maxValueIndex][b - 1] = tempValue;
                 }
             }
-            System.out.println("RI L");
-            printMatrix(L);
+            //System.out.println("Row-Interchanged L");
+            //printMatrix(L);
             for (int k = i + 1; k < rowCount; k++){
                 double factor = U[k][i] / U[i][i];
                 L[k][i] = U[k][i] / U[i][i];
@@ -105,17 +106,18 @@ public class Main {
                     U[k][l] = U[k][l] - (factor * U[i][l]);
             }
         }
-        System.out.printf("Final L;");
+        System.out.println("P Matrix");
+        printMatrix(P);
+        System.out.println("L Matrix;");
         printMatrix(L);
-        System.out.printf("Final U;");
+        System.out.println("U Matrix;");
         printMatrix(U);
 
-        System.out.printf("LU;");
+        System.out.println("LU;");
         printMatrix(matrixMultiplication(L,U));
 
-        System.out.printf("A;");
-        printMatrix(a);
-
+        System.out.println("PA;");
+        printMatrix(matrixMultiplication(P, a));
     }
 
     private static double getSigmaSum(double[][] L, double[][] U, int rowIndex, int colIndex){
@@ -131,12 +133,8 @@ public class Main {
             double[] temp = a[row1];
             a[row1] = a[row2];
             a[row2] = temp;
-
-            System.out.print("\nRow-Interchanged Matrix;");
-            printMatrix(a);
         }
     }
-
 
     private static double[][] getIdentityMatrix(int len){
         double[][] output = new double[len][len];
