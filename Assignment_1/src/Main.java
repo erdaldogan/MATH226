@@ -38,8 +38,6 @@ public class Main{
             throw new IllegalArgumentException("Row counts of A and b matrix must be equal!");
         else if(matrixA.length != matrixA[0].length)
             throw new IllegalArgumentException("Matrix A (first arg.) must be a square matrix!");
-        else
-
 
         System.gc();
 
@@ -52,14 +50,14 @@ public class Main{
         System.out.printf("\nB vector(%dx1)", matrixB.length);
         printMatrix(matrixB);
         solveSystem(matrixA, matrixB);
-
     }
 
     private static void solveSystem(double[][] A, double[] b){
         double[][] L;
         double[][] U;
         double[] y;
-        if (needsPartialPivoting(A)){
+        //if (needsPartialPivoting(A)){
+        if (true){
             System.out.println("Partial Pivoting is used!");
             double[][][] LandU= getLUDecompositionPartialPivoting(A);
             L = LandU[0];
@@ -85,10 +83,9 @@ public class Main{
         System.out.print("\nLU Multiplication;");
         printMatrix(matrixMultiplication(L,U));
 
-            printResultVector(x);
-            printMatrix(matrixMultiplication(A, x));
+        printResultVector(x);
+        printMatrix(matrixMultiplication(A, x));
     }
-    
 
     private static double[][][] getLUDecompositionNoPivoting(double[][] a){
         int rowCount = a.length, colCount = a[0].length;
