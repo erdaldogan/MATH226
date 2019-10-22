@@ -56,8 +56,8 @@ public class Main{
         double[][] L;
         double[][] U;
         double[] y;
-        //if (needsPartialPivoting(A)){
-        if (true){
+        if (needsPartialPivoting(A)){
+        //if (true){
             System.out.println("Partial Pivoting is used!");
             double[][][] LandU= getLUDecompositionPartialPivoting(A);
             L = LandU[0];
@@ -65,8 +65,6 @@ public class Main{
             double[][] P = LandU[2];
             double[] dummyB = matrixMultiplication(P, b);
             y = getForwardSubstitutionSolutionVector(L, dummyB);
-            System.out.print("Permutation Matrix;");
-            printMatrix(P);
         }
         else {
             double[][][] LandU= getLUDecompositionNoPivoting(A);
@@ -74,6 +72,8 @@ public class Main{
             U = LandU[1];
             y = getForwardSubstitutionSolutionVector(L, b);
         }
+
+
         double[] x = getBackwardSubstitutionSolutionVector(U, y);
 
         System.out.print("\nLower Triangular Matrix (L);");
@@ -82,6 +82,9 @@ public class Main{
         printMatrix(U);
         System.out.print("\nLU Multiplication;");
         printMatrix(matrixMultiplication(L,U));
+
+        if (isCloseToZero(multiplyDiagonalElements(U)))
+            throw new java.lang.ArithmeticException("The matrix is singular. (determinant ~= 0)");
 
         printResultVector(x);
         printMatrix(matrixMultiplication(A, x));
@@ -182,14 +185,15 @@ public class Main{
         return output;
     }
 
+    // multiplication of 2d matrices
     private static double[][] matrixMultiplication(double[][] a, double[][] b) throws IllegalArgumentException {
         int rowCountA = a.length, rowCountB = b.length,
-                colCountA = a[0].length, colCountB = b[0].length;
+                colCountA = a[0].length, colCountB = b[0].length; // dimensions
         if (colCountA != rowCountB)
             throw new IllegalArgumentException("These two matrices cannot be multiplied!\n" +
                     "Number of columns of the first matrix must be equal to number of rows of the second matrix!");
 
-        double[][] output = new double[rowCountA][colCountB];
+        double[][] output = new double[rowCountA][colCountB]; // define output matrix
         for(int i = 0; i < rowCountA; i++){
             for (int j = 0; j < colCountB; j++){
                 for (int k = 0; k < colCountA; k++){
@@ -200,6 +204,7 @@ public class Main{
         return output;
     }
 
+    // matrix multiplication for 2d and a 1d matrix
     private static double[] matrixMultiplication(double[][] a, double[] b) throws IllegalArgumentException {
         int rowCountA = a.length, rowCountB = b.length,
                 colCountA = a[0].length;
@@ -216,6 +221,7 @@ public class Main{
         return output;
     }
 
+    // get sigma summation in doolittle algorithm
     private static double getSigmaSumForCalculatingL(double[][] L, double[][] U, int rowIndex, int colIndex){
         int total = 0;
         for (int i = 0; i < rowIndex; i++)
@@ -223,6 +229,7 @@ public class Main{
         return total;
     }
 
+    // perform fw substitution and return result vector
     private static double[] getForwardSubstitutionSolutionVector(double[][] L, double[] b){
         int rowCount = L.length, colCount = L[0].length;
         if (rowCount != colCount)
@@ -243,7 +250,7 @@ public class Main{
 
         return sum;
     }
-
+    // perform bw substitution and return result vector
     private static double[] getBackwardSubstitutionSolutionVector(double[][] U, double[] y){
         int rowCount = U.length, colCount = U[0].length;
         if (rowCount != colCount)
@@ -259,6 +266,7 @@ public class Main{
         return x;
     }
 
+    // get the summation part in the bw subst. equation
     private static double getSigmaSumForBWSubstitution(double[][] U, double[] x, int index){
         int rowCount = U.length;
         double sum = 0;
@@ -268,6 +276,7 @@ public class Main{
         return sum;
     }
 
+    // perform row interchange
     private static void interchangeRows(double[][] a, int row1, int row2){
         if (row1 == row2){} // do nothing
         else {
@@ -277,6 +286,7 @@ public class Main{
         }
     }
 
+    // return square identity matrix for given dimension, i.e. when len is 5, return 5x5
     private static double[][] getIdentityMatrix(int len){
         double[][] output = new double[len][len];
         for (int i = 0; i < len; i++)
@@ -284,6 +294,7 @@ public class Main{
         return output;
     }
 
+    // print 2d matrix
     private static void printMatrix(double[][] matrix){
         System.out.print("\n");
         for (double[] row: matrix){
@@ -293,6 +304,7 @@ public class Main{
         }
     }
 
+    // print 1d matrix
     private static void printMatrix(double[] vector){
         System.out.print("\n");
         for (double num: vector)
@@ -300,13 +312,15 @@ public class Main{
         System.out.print("\n");
     }
 
+    // print vector with variable names such as x1, x2 etc.
     private static void printResultVector(double[] vector){
         int len = vector.length;
         System.out.print("\nResult Vector\n");
         for (int i = 0; i < len; i++)
-            System.out.printf("x%1d = %7.2f\n", i, vector[i]);
+            System.out.printf("x%1d = %7.2f\n", i, vector[i]); // output format: x1 = 0.33
     }
 
+    // 2d arraylist to primitive array
     private static double[][] matrixListToArray(ArrayList<ArrayList<Double>> arrayList){
         int rowCount = arrayList.size(), columnCount = arrayList.get(0).size();
         double[][] output = new double[rowCount][columnCount];
@@ -317,6 +331,7 @@ public class Main{
         return output;
     }
 
+    // arraylist to primitive array
     private static double[] vectorListToArray(ArrayList<Double> vector){
         int rowCount = vector.size();
         double[] output = new double[rowCount];
@@ -325,13 +340,27 @@ public class Main{
         return output;
     }
 
+    // check if there are any ~0's in pivot positions of a given matrix. If yes; return true
     private static boolean needsPartialPivoting(double[][] a){
-        for (int i = 0; i < a.length - 1; i++){
-            if (Math.abs(a[i][i]) < 0.01 || a[i][i] == 0)
+        for (int i = 0; i < a.length; i++){
+            if (isCloseToZero(a[i][i])) // equal to 0 or close to zero
                 return true;
         }
         return false;
     }
-}
 
-// For partial pivoting; PA=PLU or A=LU
+    private static double multiplyDiagonalElements(double[][] array){
+        int rowCount = array.length, colCount = array[0].length;
+        double result = 1;
+        for (int i = 0; i < rowCount; i++){
+                result *= array[i][i];
+        }
+        return result;
+    }
+
+    // return true if given input is close to zero
+    private static boolean isCloseToZero(double num){
+        return Math.abs(num) < 0.001 || num == 0;
+    }
+
+}
