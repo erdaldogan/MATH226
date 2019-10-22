@@ -7,69 +7,88 @@
 //-----------------------------------------//
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.Scanner;
 
-public class Main {
+import java.util.ArrayList;
+import java.util.Scanner;
+import java.util.concurrent.TransferQueue;
+
+public class Main{
     public static void main(String[] args) throws FileNotFoundException {
         Scanner inputA = new Scanner(new File("input_data/A.txt"));
         Scanner inputB = new Scanner(new File("input_data/B.txt"));
-        int[] dimensionsA = {inputA.nextInt(), inputA.nextInt()};
-        int lengthB = inputB.nextInt();
-        double[][] matrixA = new double[dimensionsA[0]][dimensionsA[1]];
-        double[] matrixB = new double[lengthB];
+        ArrayList<ArrayList<Double>> matrixAList = new ArrayList<>();
+        ArrayList<Double> matrixBList = new ArrayList<>();
 
-        /**
-        int row = 0;
-        while(inputA.hasNextLine())
-            matrixA[row] = getArrayOfDoubles(inputA.nextLine().split("\\s+"));
-        row = 0;
-        while (inputB.hasNextLine())
-            matrixB[row] = getArrayOfDoubles(inputB.nextLine().split("\\s+"));
+        String[] tempString;
+        while(inputA.hasNextLine()) { // reading the input file a
+            ArrayList<Double> tempDouble = new ArrayList<>();
+            tempString = inputA.nextLine().split("\\s+");
+            for (String num: tempString)
+                tempDouble.add(Double.parseDouble(num));
+            matrixAList.add(tempDouble);
+        }
+        while (inputB.hasNextDouble()) // reading the input file b
+            matrixBList.add(inputB.nextDouble());
+
+
+        double[][] matrixA = matrixListToArray(matrixAList);
+        double[] matrixB = vectorListToArray(matrixBList);
+
+        if (matrixAList.size() != matrixBList.size())
+            throw new IllegalArgumentException("Row counts of A and b matrix must be equal!");
+        else if(matrixA.length != matrixA[0].length)
+            throw new IllegalArgumentException("Matrix A (first arg.) must be a square matrix!");
+        else
+
 
         System.gc();
-        */
 
-        for (int i = 0; i < dimensionsA[0]; i++){
-            for (int j = 0; j < dimensionsA[1]; j++)
-                matrixA[i][j] = inputA.nextDouble();
-        }
-
-        for (int i = 0; i < lengthB; i++){
-                matrixB[i] = inputB.nextDouble();
-        }
         inputA.close();
         inputB.close();
 
-        System.out.print("A matrix");
+        System.out.printf("\nA matrix(%dx%d)", matrixA.length, matrixA[0].length);
         printMatrix(matrixA);
-        System.out.print("B vector");
-        printVector(matrixB);
 
+        System.out.printf("\nB vector(%dx1)", matrixB.length);
+        printMatrix(matrixB);
         solveSystem(matrixA, matrixB);
-
 
     }
 
     private static void solveSystem(double[][] A, double[] b){
-        double[][] L = getLUDecompositionNoPivoting(A)[0];
-        double[][] U = getLUDecompositionNoPivoting(A)[1];
-
-        double[] y = getForwardSubstitutionSolutionVector(L, b);
+        double[][] L;
+        double[][] U;
+        double[] y;
+        if (needsPartialPivoting(A)){
+            System.out.println("Partial Pivoting is used!");
+            double[][][] LandU= getLUDecompositionPartialPivoting(A);
+            L = LandU[0];
+            U = LandU[1];
+            double[][] P = LandU[2];
+            double[] dummyB = matrixMultiplication(P, b);
+            y = getForwardSubstitutionSolutionVector(L, dummyB);
+            System.out.print("Permutation Matrix;");
+            printMatrix(P);
+        }
+        else {
+            double[][][] LandU= getLUDecompositionNoPivoting(A);
+            L = LandU[0];
+            U = LandU[1];
+            y = getForwardSubstitutionSolutionVector(L, b);
+        }
         double[] x = getBackwardSubstitutionSolutionVector(U, y);
 
         System.out.print("\nLower Triangular Matrix (L);");
         printMatrix(L);
         System.out.print("\nUpper Triangular Matrix (U);");
         printMatrix(U);
-        System.out.print("\n(LU);");
+        System.out.print("\nLU Multiplication;");
         printMatrix(matrixMultiplication(L,U));
 
-        printResultVector(x);
-
+            printResultVector(x);
+            printMatrix(matrixMultiplication(A, x));
     }
-
-
-
+    
 
     private static double[][][] getLUDecompositionNoPivoting(double[][] a){
         int rowCount = a.length, colCount = a[0].length;
@@ -108,29 +127,23 @@ public class Main {
         int rowCount = a.length, colCount = a[0].length; // number of rows, number of columns i.e. dimensions
         if (rowCount != colCount) // if input is not square matrix
             throw new IllegalArgumentException("Input must be a square matrix!");
-        double[][][] output = new double[2][rowCount][rowCount];
+        double[][][] output = new double[3][rowCount][rowCount];
         double[][] P = getIdentityMatrix(rowCount); // permutation matrix
         double[][] L = getIdentityMatrix(rowCount); // lower triangular matrix
         double[][] U = new double[rowCount][colCount]; // upper triangular matrix
         for (int i = 0; i < rowCount; i++) // perform deep-clone
             U[i] = a[i].clone();
+
+        // iterate over all the columns, find the largest element in that column below the diagonal
         for (int i = 0; i < colCount; i++){
             int maxValueIndex = i;
-            for (int j = i; j < rowCount; j++){
-                if (Math.abs(U[j][i]) > U[maxValueIndex][i])
-                    maxValueIndex = j;
+            for (int j = i; j < rowCount; j++){ // iterate below the diagonal
+                if (Math.abs(U[j][i]) > U[maxValueIndex][i]) // if greater than the value greatest value we located yet
+                    maxValueIndex = j; // hold that index
             }
-            interchangeRows(U, i, maxValueIndex);
-            interchangeRows(P, i, maxValueIndex);
-            if (i > 0) {
-                for (int b = i; b > 0; b--) {
-                    double tempValue = L[i][b - 1];
-                    L[i][b - 1] = L[maxValueIndex][b - 1];
-                    L[maxValueIndex][b - 1] = tempValue;
-                }
-            }
-            //System.out.println("Row-Interchanged L");
-            //printMatrix(L);
+            interchangeRows(U, i, maxValueIndex); // row swap in upper matrix
+            interchangeRows(P, i, maxValueIndex); // row swap in permutation matrix
+
             for (int k = i + 1; k < rowCount; k++){
                 double factor = U[k][i] / U[i][i];
                 L[k][i] = U[k][i] / U[i][i];
@@ -138,10 +151,22 @@ public class Main {
                 for (int l = i + 1; l < colCount; l++)
                     U[k][l] = U[k][l] - (factor * U[i][l]);
             }
+
+            if (i > 0) {
+                for (int b = i; b > 0; b--) {
+                    double tempValue = L[i][b - 1];
+                    L[i][b - 1] = L[maxValueIndex][b - 1];
+                    L[maxValueIndex][b - 1] = tempValue;
+                }
+            }
         }
 
         output[0] = L;
         output[1] = U;
+        output[2] = P;
+
+        System.out.println("P Matrix");
+        printMatrix(P);
 
         /*
         System.out.println("P Matrix");
@@ -173,6 +198,22 @@ public class Main {
                 for (int k = 0; k < colCountA; k++){
                     output[i][j] += a[i][k] * b[k][j];
                 }
+            }
+        }
+        return output;
+    }
+
+    private static double[] matrixMultiplication(double[][] a, double[] b) throws IllegalArgumentException {
+        int rowCountA = a.length, rowCountB = b.length,
+                colCountA = a[0].length;
+        if (colCountA != rowCountB)
+            throw new IllegalArgumentException("These two matrices cannot be multiplied!\n" +
+                    "Number of columns of the first matrix must be equal to number of rows of the second matrix!");
+
+        double[] output = new double[rowCountA];
+        for(int i = 0; i < rowCountA; i++){
+                for (int k = 0; k < colCountA; k++){
+                    output[i] += a[i][k] * b[k];
             }
         }
         return output;
@@ -255,12 +296,11 @@ public class Main {
         }
     }
 
-    private static void printVector(double[] vector){
+    private static void printMatrix(double[] vector){
         System.out.print("\n");
         for (double num: vector)
             System.out.printf("%10.2f \n", num);
         System.out.print("\n");
-
     }
 
     private static void printResultVector(double[] vector){
@@ -268,18 +308,33 @@ public class Main {
         System.out.print("\nResult Vector\n");
         for (int i = 0; i < len; i++)
             System.out.printf("x%1d = %7.2f\n", i, vector[i]);
-
     }
-    /*
-    private static double[] getArrayOfDoubles(String[] strings){
-        int length = strings.length;
-        double[] output = new double[length];
-        for (int i = 0; i < length; i++)
-            output[i] = Double.parseDouble(strings[i]);
+
+    private static double[][] matrixListToArray(ArrayList<ArrayList<Double>> arrayList){
+        int rowCount = arrayList.size(), columnCount = arrayList.get(0).size();
+        double[][] output = new double[rowCount][columnCount];
+        for (int i = 0; i < rowCount; i++){
+            for (int j = 0; j < columnCount; j++)
+                output[i][j] = arrayList.get(i).get(j);
+        }
         return output;
     }
-     */
+
+    private static double[] vectorListToArray(ArrayList<Double> vector){
+        int rowCount = vector.size();
+        double[] output = new double[rowCount];
+        for (int i = 0; i < rowCount; i++)
+            output[i] = vector.get(i);
+        return output;
+    }
+
+    private static boolean needsPartialPivoting(double[][] a){
+        for (int i = 0; i < a.length - 1; i++){
+            if (Math.abs(a[i][i]) < 0.01 || a[i][i] == 0)
+                return true;
+        }
+        return false;
+    }
 }
 
-// Is it okay to have dimensions given at the beginning of the input files
 // For partial pivoting; PA=PLU or A=LU
