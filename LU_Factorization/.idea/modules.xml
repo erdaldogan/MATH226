@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/Assignment_1.iml" filepath="$PROJECT_DIR$/Assignment_1.iml" />
+      <module fileurl="file://$PROJECT_DIR$/LU_Factorization.iml" filepath="$PROJECT_DIR$/LU_Factorization.iml" />
     </modules>
   </component>
 </project>
