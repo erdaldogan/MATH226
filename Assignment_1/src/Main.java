@@ -7,10 +7,8 @@
 //-----------------------------------------//
 import java.io.File;
 import java.io.FileNotFoundException;
-
 import java.util.ArrayList;
 import java.util.Scanner;
-import java.util.concurrent.TransferQueue;
 
 public class Main{
     public static void main(String[] args) throws FileNotFoundException {
@@ -30,6 +28,10 @@ public class Main{
         while (inputB.hasNextDouble()) // reading the input file b
             matrixBList.add(inputB.nextDouble());
 
+        if (matrixAList.isEmpty())
+            throw new IllegalArgumentException("Given Text File(Arg1) Is Empty!");
+        else if (matrixBList.isEmpty())
+            throw new IllegalArgumentException("Given Text File(Arg2) Is Empty!");
 
         double[][] matrixA = matrixListToArray(matrixAList);
         double[] matrixB = vectorListToArray(matrixBList);
@@ -57,7 +59,6 @@ public class Main{
         double[][] U;
         double[] y;
         if (needsPartialPivoting(A)){
-        //if (true){
             System.out.println("Partial Pivoting is used!");
             double[][][] LandU= getLUDecompositionPartialPivoting(A);
             L = LandU[0];
@@ -73,7 +74,6 @@ public class Main{
             y = getForwardSubstitutionSolutionVector(L, b);
         }
 
-
         double[] x = getBackwardSubstitutionSolutionVector(U, y);
 
         System.out.print("\nLower Triangular Matrix (L);");
@@ -87,6 +87,8 @@ public class Main{
             throw new java.lang.ArithmeticException("The matrix is singular. (determinant ~= 0)");
 
         printResultVector(x);
+
+        System.out.print("\nAx = ");
         printMatrix(matrixMultiplication(A, x));
     }
 
@@ -107,20 +109,9 @@ public class Main{
                     L[i][j] = (a[i][j] - getSigmaSumForCalculatingL(L, U, i, j)) / U[j][j];
             }
         }
-
-        /*
-        System.out.print("\nLower Triangular Matrix (L);");
-        printMatrix(L);
-        System.out.print("\nUpper Triangular Matrix (U);");
-        printMatrix(U);
-        System.out.print("\n(LU);");
-        printMatrix(matrixMultiplication(L,U));
-        */
-
         output[0] = L;
         output[1] = U;
         return output;
-
     }
 
     private static double[][][] getLUDecompositionPartialPivoting(double[][] a){
@@ -223,7 +214,7 @@ public class Main{
 
     // get sigma summation in doolittle algorithm
     private static double getSigmaSumForCalculatingL(double[][] L, double[][] U, int rowIndex, int colIndex){
-        int total = 0;
+        double total = 0;
         for (int i = 0; i < rowIndex; i++)
             total += L[rowIndex][i] * U[i][colIndex];
         return total;
@@ -278,8 +269,7 @@ public class Main{
 
     // perform row interchange
     private static void interchangeRows(double[][] a, int row1, int row2){
-        if (row1 == row2){} // do nothing
-        else {
+        if (row1 != row2){
             double[] temp = a[row1]; // basic variable swapping
             a[row1] = a[row2];
             a[row2] = temp;
@@ -317,7 +307,7 @@ public class Main{
         int len = vector.length;
         System.out.print("\nResult Vector\n");
         for (int i = 0; i < len; i++)
-            System.out.printf("x%1d = %7.2f\n", i, vector[i]); // output format: x1 = 0.33
+            System.out.printf("\tx%1d = %7.2f\n", i, vector[i]); // output format: x1 = 0.33
     }
 
     // 2d arraylist to primitive array
@@ -349,10 +339,13 @@ public class Main{
         return false;
     }
 
+    // multiply diagonal
     private static double multiplyDiagonalElements(double[][] array){
-        int rowCount = array.length, colCount = array[0].length;
+        int rowCount = array.length;
         double result = 1;
         for (int i = 0; i < rowCount; i++){
+            if (array[i][i] == 0)
+                return 0;
                 result *= array[i][i];
         }
         return result;
