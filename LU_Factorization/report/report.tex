@@ -39,7 +39,7 @@ This factorization is called the \emph{LU factorization} of $A$.\\ \\We also kno
  	  Ax = b 
  \end{equation}
 Given the LU factorization of the matrix $A$, we can solve the linear system 
-(\ref{axb}}) in two steps: substitute (\ref{alu}}}) into (\ref{axb}})
+(\ref{axb}) in two steps: substitute (\ref{alu}) into (\ref{axb})
 to obtain
 \[
 LU{\bx}={\bb},
@@ -69,12 +69,22 @@ For upper triangular system $U{\bx}={\by}$
 LU Decomposition method is computationally cheaper for solving a system comparing to \textit{Gaussian Elimination} especially on large-dimension matrices. 	\textit{Java Language} is utilized for this project. \\
 	\section{Implementation \& Algorithm}
 	
-Not every matrix has LU Decomposition. If there are any zeros at pivot locations of a matrix, its LU factorization cannot be found without making any changes on the original matrix. In order to address this problem, we use \textit{row interchanges}. If there are any zeros in pivot positions in a matrix, the program will automatically use row interchanging method on it. This process of interchanging rows are called \textit{Partial Pivoting}.
+Not every matrix has LU Decomposition. If there are any zeros at pivot locations of a matrix, its LU factorization cannot be found without making any changes on the original matrix. In order to address this problem, we use \textit{row interchanges}. If there are any zeros in pivot positions in a matrix, the program will automatically use row interchanging method on it. This process of interchanging rows are called \textit{Partial Pivoting}. When we use Partial Pivoting, we use an another matrix name Permutation Matrix(P) for row interchanges. P is basically the identity matrix which its rows are interchanged. 
 
-Of course, there are matrices that has \textit{LU Fact.} as it is. For this matrices, we use an algorithm called \textit{Doolittle}, for others, i.e. matrices with zeros in pivot positions; first we convert them to regular matrices by applying \textit{Partial Pivoting}, then find the LU Fact.
+Of course, there are matrices that has \textit{LU Fact.} as it is. For this matrices, we use an algorithm called \textit{Doolittle}, for others, i.e. matrices with zeros in pivot positions; first we convert them to regular matrices by applying \textit{Partial Pivoting}, then find the LU Fact. It should be mentioned that if Partial Pivoting is used on a matrix to get LU decomposition, product of L and U will be equal to product of Permutation Matrix(P) and A matrix, instead of A matrix only;
+\begin{equation}
+  PA = LU
+\end{equation}
+
 \subsection{Doolittle Algorithm}
-	Doolittle is a simple and straightforward algorithm to compute \textit{Lower Triangular (L)} and \textit{Upper Triangular(U)} matrix. If anyone writes down the A, L and U matrices and starts to compute values in the lower and upper triangular matrices can see the pattern of the solution. 
+	Doolittle is a simple and straightforward algorithm to compute \textit{Lower Triangular (L)} and \textit{Upper Triangular(U)} matrix. If anyone writes down the A, L and U matrices and starts to compute values in the lower and upper triangular matrices can see the pattern of the solution. Calculation pattern for element of L and U matrices can be generalized as; 
+	\begin{equation}
+	u_{ij} = a_{ij} - \sum_{k=1}^{i-1}u_{kj}l_{ik}
+	\end{equation}
+	
+	\begin{equation} 
+	l_{ij} = \frac{1}{u_{jj}}\left(a_{ij} - \sum_{k=1}^{j-1}u_{kj}l_{ik}\right)
+	\end{equation}
 
-	
-	
+
 \end{document}
