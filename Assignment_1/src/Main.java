@@ -20,45 +20,51 @@ public class Main{
         String[] tempString;
         while(inputA.hasNextLine()) { // reading the input file a
             ArrayList<Double> tempDouble = new ArrayList<>();
-            tempString = inputA.nextLine().split("\\s+");
-            for (String num: tempString)
-                tempDouble.add(Double.parseDouble(num));
-            matrixAList.add(tempDouble);
+            tempString = inputA.nextLine().split("\\s+"); // split by space characters
+            for (String num: tempString) // iterate over elements of row
+                tempDouble.add(Double.parseDouble(num)); // parse string to double and add to arrayList
+            matrixAList.add(tempDouble); // add row to 2d arrayList
         }
-        while (inputB.hasNextDouble()) // reading the input file b
-            matrixBList.add(inputB.nextDouble());
+        while (inputB.hasNextDouble()) // reading the input file B
+            matrixBList.add(inputB.nextDouble()); // assuming it is a vector
 
+        // check for empty inputs
         if (matrixAList.isEmpty())
             throw new IllegalArgumentException("Given Text File(Arg1) Is Empty!");
         else if (matrixBList.isEmpty())
             throw new IllegalArgumentException("Given Text File(Arg2) Is Empty!");
 
-        double[][] matrixA = matrixListToArray(matrixAList);
+        double[][] matrixA = matrixListToArray(matrixAList); // cast ArrayList to primitive array
         double[] matrixB = vectorListToArray(matrixBList);
 
+        // check dimensions of the matrices to see if they are in appropriate size
         if (matrixAList.size() != matrixBList.size())
             throw new IllegalArgumentException("Row counts of A and b matrix must be equal!");
         else if(matrixA.length != matrixA[0].length)
             throw new IllegalArgumentException("Matrix A (first arg.) must be a square matrix!");
 
-        System.gc();
+        System.gc(); // garbage collector
 
+        // close inputs
         inputA.close();
         inputB.close();
 
+        // print given matrices for user to check if they are correctly read etc.
         System.out.printf("\nA matrix(%dx%d)", matrixA.length, matrixA[0].length);
         printMatrix(matrixA);
 
         System.out.printf("\nB vector(%dx1)", matrixB.length);
         printMatrix(matrixB);
-        solveSystem(matrixA, matrixB);
+
+        solveSystem(matrixA, matrixB); // solve given system
     }
 
     private static void solveSystem(double[][] A, double[] b){
+        boolean needsPartialPivoting = needsPartialPivoting(A); // decide if partial pivoting will be used or not
         double[][] L;
         double[][] U;
         double[] y;
-        if (needsPartialPivoting(A)){
+        if (needsPartialPivoting){
             System.out.println("Partial Pivoting is used!");
             double[][][] LandU= getLUDecompositionPartialPivoting(A);
             L = LandU[0];
@@ -80,7 +86,11 @@ public class Main{
         printMatrix(L);
         System.out.print("\nUpper Triangular Matrix (U);");
         printMatrix(U);
-        System.out.print("\nLU Multiplication;");
+        if (needsPartialPivoting)
+            System.out.print("\nLU Multiplication (PA Matrix);");
+        else
+            System.out.print("\nLU Multiplication;");
+
         printMatrix(matrixMultiplication(L,U));
 
         if (isCloseToZero(multiplyDiagonalElements(U)))
@@ -135,48 +145,34 @@ public class Main{
             interchangeRows(U, i, maxValueIndex); // row swap in upper matrix
             interchangeRows(P, i, maxValueIndex); // row swap in permutation matrix
 
-            for (int k = i + 1; k < rowCount; k++){
-                double factor = U[k][i] / U[i][i];
-                L[k][i] = U[k][i] / U[i][i];
-                U[k][i] = 0;
-                for (int l = i + 1; l < colCount; l++)
+            for (int k = i + 1; k < rowCount; k++){ // iterate below main diagonal
+                double factor = U[k][i] / U[i][i]; // constant factor for a row
+                L[k][i] = U[k][i] / U[i][i]; // calculate L value at index k,i
+                U[k][i] = 0; // since we are iterating below main diagonal, all values must be zero for upper trig.
+                for (int l = i + 1; l < colCount; l++) // calculate values of upper trig. matrix
                     U[k][l] = U[k][l] - (factor * U[i][l]);
             }
 
-            if (i > 0) {
-                for (int b = i; b > 0; b--) {
-                    double tempValue = L[i][b - 1];
+            if (i > 0) { // i is the column iterator. i > 0 means index is not at first column
+                for (int b = i; b > 0; b--) { // row swap elements below the main diagonal at lower triangular matrix
+                    double tempValue = L[i][b - 1]; // basic element swap
                     L[i][b - 1] = L[maxValueIndex][b - 1];
                     L[maxValueIndex][b - 1] = tempValue;
                 }
             }
         }
 
+        // return the L, U and P matrices
         output[0] = L;
         output[1] = U;
         output[2] = P;
 
-        System.out.println("P Matrix");
+        System.out.print("\nP Matrix;");
         printMatrix(P);
-
-        /*
-        System.out.println("P Matrix");
-        printMatrix(P);
-        System.out.println("L Matrix;");
-        printMatrix(L);
-        System.out.println("U Matrix;");
-        printMatrix(U);
-
-        System.out.println("LU;");
-        printMatrix(matrixMultiplication(L,U));
-
-        System.out.println("PA;");
-        printMatrix(matrixMultiplication(P, a));
-        */
         return output;
     }
 
-    // multiplication of 2d matrices
+    // matrix multiplication of 2d matrices
     private static double[][] matrixMultiplication(double[][] a, double[][] b) throws IllegalArgumentException {
         int rowCountA = a.length, rowCountB = b.length,
                 colCountA = a[0].length, colCountB = b[0].length; // dimensions
@@ -184,12 +180,11 @@ public class Main{
             throw new IllegalArgumentException("These two matrices cannot be multiplied!\n" +
                     "Number of columns of the first matrix must be equal to number of rows of the second matrix!");
 
-        double[][] output = new double[rowCountA][colCountB]; // define output matrix
-        for(int i = 0; i < rowCountA; i++){
-            for (int j = 0; j < colCountB; j++){
-                for (int k = 0; k < colCountA; k++){
-                    output[i][j] += a[i][k] * b[k][j];
-                }
+        double[][] output = new double[rowCountA][colCountB]; // declare output matrix
+        for(int i = 0; i < rowCountA; i++){ // iterate over rows of A
+            for (int j = 0; j < colCountB; j++){ // for each row of A, iterate over columns of B
+                for (int k = 0; k < colCountA; k++) // iterate over elements of given row of A and column of B
+                    output[i][j] += a[i][k] * b[k][j]; // multiply value from input matrices and sum
             }
         }
         return output;
@@ -222,18 +217,19 @@ public class Main{
 
     // perform fw substitution and return result vector
     private static double[] getForwardSubstitutionSolutionVector(double[][] L, double[] b){
-        int rowCount = L.length, colCount = L[0].length;
+        int rowCount = L.length, colCount = L[0].length; // dimensions
         if (rowCount != colCount)
             throw new IllegalArgumentException("Lower Triangular matrix must be square!");
         if (colCount != b.length)
             throw new IllegalArgumentException("b vector has inappropriate size!");
-        double[] y = new double[rowCount];
+        double[] y = new double[rowCount]; // output matrix
         y[0] = b[0] / L[0][0];
         for (int i = 1; i < rowCount; i++)
             y[i] = (b[i] - getSigmaSumForFWSubstitution(L, y, i)) / L[i][i];
         return y;
     }
 
+    // get the summation part in the fw subst. equation
     private static double getSigmaSumForFWSubstitution(double[][] L, double[] y, int index){ // index of x
         double sum = 0;
         for (int i = 0; i < index; i++)
@@ -241,6 +237,7 @@ public class Main{
 
         return sum;
     }
+
     // perform bw substitution and return result vector
     private static double[] getBackwardSubstitutionSolutionVector(double[][] U, double[] y){
         int rowCount = U.length, colCount = U[0].length;
@@ -267,16 +264,16 @@ public class Main{
         return sum;
     }
 
-    // perform row interchange
+    // perform row interchange on given matrix for given row indices row1 and row2
     private static void interchangeRows(double[][] a, int row1, int row2){
-        if (row1 != row2){
+        if (row1 != row2){ // perform if given indies are not equal, cannot swap row 3 with row 3 :)
             double[] temp = a[row1]; // basic variable swapping
             a[row1] = a[row2];
             a[row2] = temp;
         }
     }
 
-    // return square identity matrix for given dimension, i.e. when len is 5, return 5x5
+    // return square identity matrix for given dimension, i.e. when len = 5, return 5x5 identity matrix
     private static double[][] getIdentityMatrix(int len){
         double[][] output = new double[len][len];
         for (int i = 0; i < len; i++)
@@ -333,13 +330,13 @@ public class Main{
     // check if there are any ~0's in pivot positions of a given matrix. If yes; return true
     private static boolean needsPartialPivoting(double[][] a){
         for (int i = 0; i < a.length; i++){
-            if (isCloseToZero(a[i][i])) // equal to 0 or close to zero
+            if (isCloseToZero(a[i][i])) // equal to 0 or close to zero at main diagonal
                 return true;
         }
         return false;
     }
 
-    // multiply diagonal
+    // multiply diagonal elements of given matrix
     private static double multiplyDiagonalElements(double[][] array){
         int rowCount = array.length;
         double result = 1;
@@ -355,5 +352,4 @@ public class Main{
     private static boolean isCloseToZero(double num){
         return Math.abs(num) < 0.001 || num == 0;
     }
-
 }
