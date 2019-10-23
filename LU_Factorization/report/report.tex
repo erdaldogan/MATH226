@@ -1,0 +1,80 @@
+\documentclass{article}
+\usepackage[top= 15mm, bottom = 25mm]{geometry}
+\usepackage{amsfonts,latexsym}
+\newcommand{\fl}{{\mbox{fl}}}
+\newcommand{\bx}{{\mathbf x}}
+\newcommand{\by}{{\mathbf y}}
+\newcommand{\bb}{{\mathbf b}}
+
+\setlength{\parindent}{4mm}
+\setlength{\parskip}{0.3em}
+
+
+\title{MATH226 Project I \\ LU Factorization}
+\author{Erdal Sidal Dogan \\ MEF University \\ \#041702023}
+\begin{document}
+	\maketitle
+	\section{Project Definition \& Goal}
+	Main goal of the project is to design and implement a computer program which will solve a given system of linear equation by using \textit{LU Decomposition} method. LU Decomposition, often referred as LU factorization, is a method where a given matrix $A$ is represented as product of two other matrices L and U. L is Lower Triangular matrix where the main diagonal is all 1's and there are zeros only above the main diagonal. Likewise, U is the Upper Triangular Matrix where there are not any values except zero below the main diagonal. 
+	\begin{equation} \label{alu}
+ 	  A = LU 
+ \end{equation} 
+\begin{equation}
+A=\left[\begin{array}{ccccc} 
+a_{11} & a_{12} & a_{1,3} \\
+a_{21} & a_{22} & a_{2,3} \\
+a_{31} & a_{32} & a_{33} 
+\end{array}\right] = \left[\begin{array}{ccccc} 
+l_{11} & 0 & 0 \\
+l_{21} & l_{22} & 0 \\
+l_{31} & l_{32} & l_{33} 
+\end{array}\right]\left[\begin{array}{ccccc} 
+u_{11} & u_{12} & u_{13} \\
+0 & u_{22} & u_{23} \\
+0 & 0 & u_{33} 
+\end{array}\right] 
+\end{equation}\\\\
+This factorization is called the \emph{LU factorization} of $A$.\\ \\We also know that a linear systems of equations are defined as;
+ 	\begin{equation} \label{axb}
+ 	  Ax = b 
+ \end{equation}
+Given the LU factorization of the matrix $A$, we can solve the linear system 
+(\ref{axb}}) in two steps: substitute (\ref{alu}}}) into (\ref{axb}})
+to obtain
+\[
+LU{\bx}={\bb},
+\]
+and then solve the triangular systems, in order,
+\begin{eqnarray}
+\label{fsubst}
+L{\by}&=&{\bb}, \\
+\label{bsubst}
+U{\bx}&=&{\by}.
+\end{eqnarray}
+
+Equations such as (\ref{fsubst}) and (\ref{bsubst}) can be solved with methods which are called \textit{Forward Substitution} and \textit{Backward Substitution}. Which are computationally cheap also.
+\subsection{Forward Substitution}
+For lower triangular system $L{\bx}={\bb}$
+\begin{equation}
+  x_1 = b_1/l_{11},\hspace{4mm} x_i = \left( b_i - \sum_{j=1}^{i-1}l_{ij}x_i\right) \mathbin{/} l_{ii}, \hspace{4mm} i =2,\ldots,n
+\end{equation}
+\subsubsection{Psuedocode}
+
+\subsection{Backward Substitution}
+For upper triangular system $U{\bx}={\by}$
+\begin{equation}
+  x_n = b_n/u_{nn},\hspace{4mm} x_i = \left( b_i - \sum_{j=i+1}^{n}u_{ij}x_j\right) \mathbin{/} u_{ii}, \hspace{4mm} i =n -1,\ldots,1
+\end{equation}
+
+LU Decomposition method is computationally cheaper for solving a system comparing to \textit{Gaussian Elimination} especially on large-dimension matrices. 	\textit{Java Language} is utilized for this project. \\
+	\section{Implementation \& Algorithm}
+	
+Not every matrix has LU Decomposition. If there are any zeros at pivot locations of a matrix, its LU factorization cannot be found without making any changes on the original matrix. In order to address this problem, we use \textit{row interchanges}. If there are any zeros in pivot positions in a matrix, the program will automatically use row interchanging method on it. This process of interchanging rows are called \textit{Partial Pivoting}.
+
+Of course, there are matrices that has \textit{LU Fact.} as it is. For this matrices, we use an algorithm called \textit{Doolittle}, for others, i.e. matrices with zeros in pivot positions; first we convert them to regular matrices by applying \textit{Partial Pivoting}, then find the LU Fact.
+\subsection{Doolittle Algorithm}
+	Doolittle is a simple and straightforward algorithm to compute \textit{Lower Triangular (L)} and \textit{Upper Triangular(U)} matrix. If anyone writes down the A, L and U matrices and starts to compute values in the lower and upper triangular matrices can see the pattern of the solution. 
+
+	
+	
+\end{document}
