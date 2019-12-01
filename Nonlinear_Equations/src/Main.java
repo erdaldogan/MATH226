@@ -1,3 +1,10 @@
+//-----------------------------------------//
+// MATH226 - Numerical Methods for EE
+// Project 02
+//
+// Name-Surname: Erdal Sidal Dogan
+// Student ID: 041702023
+//-----------------------------------------//
 import java.util.Scanner;
 
 public class Main {
@@ -6,23 +13,29 @@ public class Main {
                 "[1]\tx^3 - 2x - 5\n" +
                 "[2]\te^(-x) - x\n" +
                 "[3]\txsin(x) - 1\n" +
-                "[4]\tx^3 - 3x^2 + 3x - 1\n\n" +
-                "Enter the function index (1-4):");
+                "[4]\tx^3 - 3x^2 + 3x - 1\n" +
+                "[5]\t0.5 - xe^(-x^2)\n" +
+                "[6]\tx^2 + 4cos(x)\n\n" +
+                "Enter the function index (1-6):");
         int functionSelection = new Scanner(System.in).nextInt();
 
+        System.out.print("\n\nChoose the operation:\n" +
+                "[1]\tFind the roots of the function (Secant & Bisection Method)\n" +
+                "[2]\tFind the minimum (Newton's Method)\n" +
+                "Enter the operation index (1-2):");
+        int methodSelection = new Scanner(System.in).nextInt();
 
-        System.out.print("Choose the method:\n" +
-                "[1]\tSecant" +
-                "[2]\tBisection" +
-                "[3]\tNewton's Method" +
-                "Enter the method index (1-3):");
-
-        System.out.println(secant(functionSelection));
-        System.out.println(bisection(functionSelection));
-        System.out.println(newtons(functionSelection));
+        if (methodSelection == 1){
+            printGreen("Solution is:\t" + secant(functionSelection) + "\n");
+            printGreen("Solution is:\t" + bisection(functionSelection) + "\n");
+        }
+        else if (methodSelection == 2)
+            printGreen("Minimum value is:\t" + newtons(functionSelection) + "\n");
     }
 
     private static double bisection(int selection) throws AssertionError{
+        final String ANSI_RED = "\u001B[31m";
+        final String ANSI_RESET  = "\u001B[0m";
         System.out.println("\n\nBisection Method\n");
         double sign_fa = 0; // sign of f(a)
         double sign_fb = 0;
@@ -40,11 +53,16 @@ public class Main {
             f_b = functionSelector(selection, b);
             sign_fa = Math.signum(f_a);
             sign_fb = Math.signum(f_b);
-            if (sign_fa == sign_fb)
-                System.err.println("Signs of the function values are same!\nChoose another interval!");
+            if (sign_fa == sign_fb) {
+                printRed("Signs of the function values are same!\nChoose another interval or quit\n" +
+                        "(Type 'q' to quit, any other value to choose another interval)");
+                String userChoice = new Scanner(System.in).next().toLowerCase();
+                if (userChoice.equals("q"))
+                    return 0;
+            }
         }
         double tolerance = 0.0001;
-        double error = 100;
+        double error = 1;
         System.out.format("%-15s%-15s%-15s%-15s\n","a", "f(a)", "b", "f(b)");
         while (error > tolerance){
             sign_fa = Math.signum(f_a);
@@ -70,7 +88,7 @@ public class Main {
         double xi = new Scanner(System.in).nextDouble();
         double tolerance = 0.0001, error = 1;
 
-        double fxi0 = functionSelector(selection, xi0), fxi = functionSelector(selection, xi), fxi1 = 0;
+        double fxi0 = functionSelector(selection, xi0), fxi = functionSelector(selection, xi), fxi1;
         System.out.format("%-15s%-15s%-15s%-15s\n","xi0", "xi", "xi1", "f(xi1)");
         while (error > tolerance){
             double xi1 = xi - (fxi * (xi - xi0) / (fxi - fxi0));
@@ -86,51 +104,26 @@ public class Main {
     }
 
     private static double newtons(int selection){
-        System.out.println("\n\nNewston's Method\n");
+        System.out.println("\n\nNewton's Method\n");
         System.out.println("Enter your initial guess: ");
         double xk = new Scanner(System.in).nextDouble();
         double xk1 = 0;
-        double tolerance = 0.0001, error = 1;
-        System.out.format("%-15s%-15s\n","xk", "xk1");
-        while (error > tolerance){
-            xk1 = xk - (functionSelector(selection, xk) / functionSelectorPrimes(selection, xk));
-            error = Math.abs(xk1 - xk);
-            System.out.format("%-15f%-15f\n",xk, xk1);
+        double f_xk = functionSelector(selection, xk); // most recent f(xk)
+        double f_xk_temp = -10; // hold previous value for convergence check
+        System.out.format("%-15s%-15s%-15s%-15s\n","xk", "f(xk)", "f'(xk)", "f''(xk)");
+        for (int i = 0; i < 200; i++){
+            double prime = functionSelectorPrimes(selection, xk);
+            double double_prime = functionSelectorDoublePrimes(selection, xk);
+            if (double_prime <= 0){
+                printRed("Newton's Method is diverging! (f‘‘(x) ≤ 0)\n");
+                break;
+            }
+            xk1 = xk - (prime / double_prime);// x_(k+1)
+            System.out.format("%-15f%-15f%-15f%-15f\n",xk, f_xk, prime, double_prime);
+
             xk = xk1;
         }
         return xk1;
-    }
-
-
-    private static double f(double x){
-        return Math.pow(x, 3) - (2 * x) - 5;
-    }
-
-    private static double f_prime(double x){
-        return 3 * Math.pow(x, 2) - 2;
-    }
-
-    private static double f1(double x){
-        return Math.exp(-x) - x;
-    }
-
-    private static double f1_prime(double x){
-        return -Math.exp(-x) - 1;
-    }
-
-    private static double f2(double x){
-        return x * Math.sin(degToRad(x)) - 1;
-    }
-
-    private static double f2_prime(double x){
-        return Math.sin(degToRad(x)) + (x * Math.cos(degToRad(x)));
-    }
-
-    private static double f3(double x){
-        return Math.pow(x, 3) - (3 * Math.pow(x,2)) + 3 * x - 1;
-    }
-    private static double f3_prime(double x){
-        return 3 * Math.pow(x, 2) - 6 * x + 3;
     }
 
     private static double functionSelector(int selection, double x){
@@ -139,6 +132,10 @@ public class Main {
             case 2: return Math.exp(-x) - x;
             case 3: return x * Math.sin(degToRad(x)) - 1;
             case 4: return Math.pow(x, 3) - (3 * Math.pow(x,2)) + 3 * x - 1;
+            case 5: return 0.5 - x * Math.exp(-Math.pow(x, 2));
+            case 6: return Math.pow(x, 2) + 4 * Math.cos(degToRad(x));
+            case 7: return Math.pow(x, 4) - 14 * Math.pow(x, 3) + 60 * Math.pow(x, 2) - 70 * x;
+
         }
         return 0;
     }
@@ -149,6 +146,19 @@ public class Main {
             case 2: return -Math.exp(-x) - 1;
             case 3: return Math.sin(degToRad(x)) + (x * Math.cos(degToRad(x)));
             case 4: return 3 * Math.pow(x, 2) - 6 * x + 3;
+            case 5: return -Math.exp(-Math.pow(x, 2)) + 2 * Math.pow(x, 2) * Math.exp(-Math.pow(x, 2));
+            case 6: return (2 * x) - (4 * Math.sin(degToRad(x)));
+            case 7: return 4 * Math.pow(x, 3) - 42 * Math.pow(x, 2) + 120 * x - 70;
+
+        }
+        return 0;
+    }
+
+    private static double functionSelectorDoublePrimes(int selection, double x){
+        switch (selection){
+            case 5: return 2 * x * (3 - 2 * Math.pow(x, 2)) * Math.exp(-Math.pow(x, 2));
+            case 6: return 2 - (4 * Math.cos(degToRad(x)));
+            case 7: return 12 * Math.pow(x, 2) - 84 * x + 120;
         }
         return 0;
     }
@@ -157,4 +167,15 @@ public class Main {
         return (Math.PI / 180) * num;
     }
 
+    private static void printRed(String x){
+        final String ANSI_RED = "\u001B[31m";
+        final String ANSI_RESET  = "\u001B[0m";
+        System.out.print(ANSI_RED + x + ANSI_RESET);
+    }
+
+    private static void printGreen(String x){
+        final String ANSI_GREEN  = "\u001B[32m";
+        final String ANSI_RESET  = "\u001B[0m";
+        System.out.print(ANSI_GREEN + x + ANSI_RESET);
+    }
 }
