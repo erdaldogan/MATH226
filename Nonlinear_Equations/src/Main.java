@@ -2,29 +2,42 @@ import java.util.Scanner;
 
 public class Main {
     public static void main(String[] args) {
-        System.out.println(secant());
-        System.out.println(bisection());
-        System.out.println(newtons());
+        System.out.print("Choose the function:\n" +
+                "[1]\tx^3 - 2x - 5\n" +
+                "[2]\te^(-x) - x\n" +
+                "[3]\txsin(x) - 1\n" +
+                "[4]\tx^3 - 3x^2 + 3x - 1\n\n" +
+                "Enter the function index (1-4):");
+        int functionSelection = new Scanner(System.in).nextInt();
 
 
+        System.out.print("Choose the method:\n" +
+                "[1]\tSecant" +
+                "[2]\tBisection" +
+                "[3]\tNewton's Method" +
+                "Enter the method index (1-3):");
+
+        System.out.println(secant(functionSelection));
+        System.out.println(bisection(functionSelection));
+        System.out.println(newtons(functionSelection));
     }
 
-    private static double bisection() throws AssertionError{
+    private static double bisection(int selection) throws AssertionError{
         System.out.println("\n\nBisection Method\n");
-        double sign_fa = 0;
+        double sign_fa = 0; // sign of f(a)
         double sign_fb = 0;
-        double f_a = 0;
+        double f_a = 0; // value of f(a)
         double f_b = 0;
-        double a = 0;
+        double a = 0; // interval [a, b]
         double b = 0;
 
-        while (sign_fa == sign_fb) {
+        while (sign_fa == sign_fb) { // repeatedly ask for new intervals if function value given ones have same signs
             System.out.println("Please enter intervals\n a=");
             a = new Scanner(System.in).nextDouble();
             System.out.println("b=");
             b = new Scanner(System.in).nextDouble();
-            f_a = f1(a);
-            f_b = f1(b);
+            f_a = functionSelector(selection, a);
+            f_b = functionSelector(selection, b);
             sign_fa = Math.signum(f_a);
             sign_fb = Math.signum(f_b);
             if (sign_fa == sign_fb)
@@ -36,20 +49,20 @@ public class Main {
         while (error > tolerance){
             sign_fa = Math.signum(f_a);
             double middle = a + (b - a) / 2;
-            double sign_mid = Math.signum(f1(middle));
+            double sign_mid = Math.signum(functionSelector(selection, middle));
             if (sign_mid == sign_fa)
                 a = middle;
             else
                 b = middle;
-            f_a = f1(a);
-            f_b = f1(b);
+            f_a = functionSelector(selection, a);
+            f_b = functionSelector(selection, b);
             error = Math.abs(f_a - f_b);
             System.out.printf("%-15f%-15f%-15f%-15f\n", a, f_a, b, f_b);
         }
         return b;
     }
 
-    private static double secant(){
+    private static double secant(int selection){
         System.out.println("\n\nSecant Method\n");
         System.out.println("Enter your initial guess x_0: ");
         double xi0 = new Scanner(System.in).nextDouble();
@@ -57,22 +70,22 @@ public class Main {
         double xi = new Scanner(System.in).nextDouble();
         double tolerance = 0.0001, error = 1;
 
-        double fxi0 = f1(xi0), fxi = f1(xi), fxi1 = 0;
+        double fxi0 = functionSelector(selection, xi0), fxi = functionSelector(selection, xi), fxi1 = 0;
         System.out.format("%-15s%-15s%-15s%-15s\n","xi0", "xi", "xi1", "f(xi1)");
         while (error > tolerance){
             double xi1 = xi - (fxi * (xi - xi0) / (fxi - fxi0));
-            fxi1 = f1(xi1);
+            fxi1 = functionSelector(selection, xi1);
             error = Math.abs(xi1 - xi);
             System.out.printf("%-15f%-15f%-15f%-15f\n", xi0, xi, xi1, fxi1);
             xi0 = xi;
             xi = xi1;
-            fxi0 = f1(xi0);
-            fxi = f1(xi);
+            fxi0 = functionSelector(selection, xi0);
+            fxi = functionSelector(selection, xi);
         }
         return xi;
     }
 
-    private static double newtons(){
+    private static double newtons(int selection){
         System.out.println("\n\nNewston's Method\n");
         System.out.println("Enter your initial guess: ");
         double xk = new Scanner(System.in).nextDouble();
@@ -80,7 +93,7 @@ public class Main {
         double tolerance = 0.0001, error = 1;
         System.out.format("%-15s%-15s\n","xk", "xk1");
         while (error > tolerance){
-            xk1 = xk - (f1(xk) / f1_prime(xk));
+            xk1 = xk - (functionSelector(selection, xk) / functionSelectorPrimes(selection, xk));
             error = Math.abs(xk1 - xk);
             System.out.format("%-15f%-15f\n",xk, xk1);
             xk = xk1;
@@ -115,17 +128,33 @@ public class Main {
 
     private static double f3(double x){
         return Math.pow(x, 3) - (3 * Math.pow(x,2)) + 3 * x - 1;
-
     }
-
     private static double f3_prime(double x){
         return 3 * Math.pow(x, 2) - 6 * x + 3;
     }
 
+    private static double functionSelector(int selection, double x){
+        switch (selection) {
+            case 1: return Math.pow(x, 3) - (2 * x) - 5;
+            case 2: return Math.exp(-x) - x;
+            case 3: return x * Math.sin(degToRad(x)) - 1;
+            case 4: return Math.pow(x, 3) - (3 * Math.pow(x,2)) + 3 * x - 1;
+        }
+        return 0;
+    }
+
+    private static double functionSelectorPrimes(int selection, double x){
+        switch (selection){
+            case 1: return 3 * Math.pow(x, 2) - 2;
+            case 2: return -Math.exp(-x) - 1;
+            case 3: return Math.sin(degToRad(x)) + (x * Math.cos(degToRad(x)));
+            case 4: return 3 * Math.pow(x, 2) - 6 * x + 3;
+        }
+        return 0;
+    }
+
     private static double degToRad(double num){
         return (Math.PI / 180) * num;
-
     }
 
 }
-
