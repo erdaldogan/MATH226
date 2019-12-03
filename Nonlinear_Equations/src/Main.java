@@ -85,12 +85,11 @@ public class Main {
 
     private static double secant(int selection){
         System.out.println("\n\nSecant Method");
-        System.out.println("Enter your initial guess x_0: ");
+        System.out.println("Enter your initial guess for x_0: ");
         double xi0 = new Scanner(System.in).nextDouble();
-        System.out.println("Enter your initial guess x_1: ");
+        System.out.println("Enter your initial guess for x_1: ");
         double xi = new Scanner(System.in).nextDouble();
         double tolerance = 0.0001, error = 1;
-
         double fxi0 = functionSelector(selection, xi0), fxi = functionSelector(selection, xi), fxi1;
         System.out.format("%-15s%-15s%-15s%-15s\n","xi0", "xi", "xi1", "f(xi1)");
         while (error > tolerance){
@@ -98,9 +97,9 @@ public class Main {
             fxi1 = functionSelector(selection, xi1);
             error = Math.abs(xi1 - xi);
             System.out.printf("%-15f%-15f%-15f%-15f\n", xi0, xi, xi1, fxi1);
-            xi0 = xi;
-            xi = xi1;
-            fxi0 = functionSelector(selection, xi0);
+            xi0 = xi; // xi0 = xi-
+            xi = xi1; // xi1 = xi+
+            fxi0 = functionSelector(selection, xi0); // fxi = f(xi)
             fxi = functionSelector(selection, xi);
         }
         return xi;
@@ -110,24 +109,24 @@ public class Main {
         System.out.println("\n\nNewton's Method");
         System.out.println("Enter your initial guess: ");
         double xk = new Scanner(System.in).nextDouble();
-        double xk1 = 0;
+        double xk1 = 0;// next xk (xk+)
         double f_xk; // most recent f(xk)
         double f_xk_temp = -10; // hold previous value for convergence check
         System.out.format("%-20s%-20s%-20s%-20s\n","xk", "f(xk)", "f'(xk)", "f''(xk)");
-        for (int i = 0; i < 200; i++){
+        for (int i = 0; i < 200; i++){ // 200 iterations at max
             f_xk = functionSelector(selection, xk); // most recent f(xk)
-            if (Math.abs(f_xk_temp - f_xk) < 0.00001)
+            if (Math.abs(f_xk_temp - f_xk) < 0.00001) // if converging
                 break;
-            f_xk_temp = f_xk;
-            double prime = functionSelectorPrimes(selection, xk);
-            double double_prime = functionSelectorDoublePrimes(selection, xk);
+            f_xk_temp = f_xk; // hold current value
+            double prime = functionSelectorPrimes(selection, xk); // f'(xk)
+            double double_prime = functionSelectorDoublePrimes(selection, xk); // f''(x)
             if (double_prime <= 0){
                 printRed("Newton's Method is diverging! (f‘‘(x) ≤ 0)\n");
                 break;
             }
-            xk1 = xk - (prime / double_prime);// x_(k+1)
+            xk1 = xk - (prime / double_prime);// x_(k+1), next xk
             System.out.format("%-20.4f%-20.4f%-20.4f%-20.4f\n",xk, f_xk, prime, double_prime);
-            xk = xk1;
+            xk = xk1; // update the xk and start new iteration
         }
         return xk1;
     }
