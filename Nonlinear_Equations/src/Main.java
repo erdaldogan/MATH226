@@ -17,28 +17,28 @@ public class Main {
                 "[5]\t0.5 - xe^(-x^2)\n" +
                 "[6]\tx^2 + 4cos(x)\n" +
                 "[7]\tx^4 - 14x^3 + 60x^2 - 70x\n\n" +
-                "Enter the function index (1-6):");
-        int functionSelection = new Scanner(System.in).nextInt();
+                "Enter the function index (1-7):");
+        int functionSelection = new Scanner(System.in).nextInt(); // user choose which function to use
 
         System.out.print("\n\nChoose the operation:\n" +
                 "[1]\tFind the roots of the function (Secant & Bisection Method)\n" +
                 "[2]\tFind the minimum (Newton's Method)\n" +
                 "Enter the operation index (1-2):");
-        int methodSelection = new Scanner(System.in).nextInt();
+        int methodSelection = new Scanner(System.in).nextInt(); // user choose which operation to perform
 
-        if (methodSelection == 1){
+        if (methodSelection == 1){  // root finding
             printGreen("Solution is:\t" + secant(functionSelection) + "\n");
             printGreen("Solution is:\t" + bisection(functionSelection) + "\n");
         }
-        else if (methodSelection == 2) {
+        else if (methodSelection == 2) { // minimization
             double result_x = newtons(functionSelection);
             printGreen("Minimum value is at x:\t" + result_x + ", f(x) = " +
                     functionSelector(functionSelection, result_x) +"\n");
         }
     }
 
-    private static double bisection(int selection) throws AssertionError{
-        System.out.println("\n\nBisection Method\n");
+    private static double bisection(int selection) throws AssertionError{  // root finding bisection method
+        System.out.println("\n\nBisection Method");
         double sign_fa = 0; // sign of f(a)
         double sign_fb = 0;
         double f_a = 0; // value of f(a)
@@ -48,42 +48,43 @@ public class Main {
 
         while (sign_fa == sign_fb) { // repeatedly ask for new intervals if function value given ones have same signs
             System.out.println("Please enter intervals\n a=");
-            a = new Scanner(System.in).nextDouble();
+            a = new Scanner(System.in).nextDouble(); // interval [a, b]
             System.out.println("b=");
             b = new Scanner(System.in).nextDouble();
-            f_a = functionSelector(selection, a);
-            f_b = functionSelector(selection, b);
-            sign_fa = Math.signum(f_a);
+            f_a = functionSelector(selection, a); // value of the function at point 'a'
+            f_b = functionSelector(selection, b); // value of the function at point 'b'
+            sign_fa = Math.signum(f_a); // sign of the function, either 1 or -1
             sign_fb = Math.signum(f_b);
-            if (sign_fa == sign_fb) {
+            if (sign_fa == sign_fb) { // same signs on both values means there is(are) no zero(s) between the interval
                 printRed("Signs of the function values are same!\nChoose another interval or quit\n" +
                         "(Type 'q' to quit, any other value to choose another interval)");
                 String userChoice = new Scanner(System.in).next().toLowerCase();
-                if (userChoice.equals("q"))
+                if (userChoice.equals("q")) // quit
                     return 0;
             }
         }
         double tolerance = 0.0001;
-        double error = 1;
+        double error = 1; // difference between the f(a) & f(b), will converge to 0 zero as we get closer to the root
         System.out.format("%-15s%-15s%-15s%-15s\n","a", "f(a)", "b", "f(b)");
         while (error > tolerance){
-            sign_fa = Math.signum(f_a);
-            double middle = a + (b - a) / 2;
-            double sign_mid = Math.signum(functionSelector(selection, middle));
-            if (sign_mid == sign_fa)
-                a = middle;
-            else
-                b = middle;
-            f_a = functionSelector(selection, a);
-            f_b = functionSelector(selection, b);
-            error = Math.abs(f_a - f_b);
             System.out.printf("%-15f%-15f%-15f%-15f\n", a, f_a, b, f_b);
+            sign_fa = Math.signum(f_a);
+            sign_fb = Math.signum(f_b);
+            double middle = a + (b - a) / 2; // middle point of the interval, a or b will be shifted here later
+            double sign_mid = Math.signum(functionSelector(selection, middle)); // sign of middle point
+            if (sign_mid == sign_fa) // whether a has same sign w/ middle or not. If same, move a to middle point
+                a = middle;
+            else if (sign_mid == sign_fb) // same for b
+                b = middle;
+            f_a = functionSelector(selection, a); // new value of f(a)
+            f_b = functionSelector(selection, b); // new value of f(b)
+            error = Math.abs(f_a - f_b);
         }
         return b;
     }
 
     private static double secant(int selection){
-        System.out.println("\n\nSecant Method\n");
+        System.out.println("\n\nSecant Method");
         System.out.println("Enter your initial guess x_0: ");
         double xi0 = new Scanner(System.in).nextDouble();
         System.out.println("Enter your initial guess x_1: ");
@@ -106,7 +107,7 @@ public class Main {
     }
 
     private static double newtons(int selection){
-        System.out.println("\n\nNewton's Method\n");
+        System.out.println("\n\nNewton's Method");
         System.out.println("Enter your initial guess: ");
         double xk = new Scanner(System.in).nextDouble();
         double xk1 = 0;
@@ -120,10 +121,10 @@ public class Main {
             f_xk_temp = f_xk;
             double prime = functionSelectorPrimes(selection, xk);
             double double_prime = functionSelectorDoublePrimes(selection, xk);
-            /*if (double_prime <= 0){
+            if (double_prime <= 0){
                 printRed("Newton's Method is diverging! (f‘‘(x) ≤ 0)\n");
                 break;
-            }*/
+            }
             xk1 = xk - (prime / double_prime);// x_(k+1)
             System.out.format("%-20.4f%-20.4f%-20.4f%-20.4f\n",xk, f_xk, prime, double_prime);
             xk = xk1;
@@ -136,7 +137,7 @@ public class Main {
             case 1: return Math.pow(x, 3) - (2 * x) - 5;
             case 2: return Math.exp(-x) - x;
             case 3: return x * Math.sin(x) - 1;
-            case 4: return Math.pow(x, 3) - (3 * Math.pow(x,2)) + 3 * x - 1;
+            case 4: return Math.pow(x, 3) - (3 * Math.pow(x,2)) + (3 * x) - 1;
             case 5: return 0.5 - x * Math.exp(-Math.pow(x, 2));
             case 6: return Math.pow(x, 2) + 4 * Math.cos(x);
             case 7: return Math.pow(x, 4) - 14 * Math.pow(x, 3) + 60 * Math.pow(x, 2) - 70 * x;
