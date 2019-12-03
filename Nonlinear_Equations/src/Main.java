@@ -15,7 +15,8 @@ public class Main {
                 "[3]\txsin(x) - 1\n" +
                 "[4]\tx^3 - 3x^2 + 3x - 1\n" +
                 "[5]\t0.5 - xe^(-x^2)\n" +
-                "[6]\tx^2 + 4cos(x)\n\n" +
+                "[6]\tx^2 + 4cos(x)\n" +
+                "[7]\tx^4 - 14x^3 + 60x^2 - 70x\n\n" +
                 "Enter the function index (1-6):");
         int functionSelection = new Scanner(System.in).nextInt();
 
@@ -29,13 +30,14 @@ public class Main {
             printGreen("Solution is:\t" + secant(functionSelection) + "\n");
             printGreen("Solution is:\t" + bisection(functionSelection) + "\n");
         }
-        else if (methodSelection == 2)
-            printGreen("Minimum value is:\t" + newtons(functionSelection) + "\n");
+        else if (methodSelection == 2) {
+            double result_x = newtons(functionSelection);
+            printGreen("Minimum value is at x:\t" + result_x + ", f(x) = " +
+                    functionSelector(functionSelection, result_x) +"\n");
+        }
     }
 
     private static double bisection(int selection) throws AssertionError{
-        final String ANSI_RED = "\u001B[31m";
-        final String ANSI_RESET  = "\u001B[0m";
         System.out.println("\n\nBisection Method\n");
         double sign_fa = 0; // sign of f(a)
         double sign_fb = 0;
@@ -108,19 +110,22 @@ public class Main {
         System.out.println("Enter your initial guess: ");
         double xk = new Scanner(System.in).nextDouble();
         double xk1 = 0;
-        double f_xk = functionSelector(selection, xk); // most recent f(xk)
+        double f_xk; // most recent f(xk)
         double f_xk_temp = -10; // hold previous value for convergence check
-        System.out.format("%-15s%-15s%-15s%-15s\n","xk", "f(xk)", "f'(xk)", "f''(xk)");
+        System.out.format("%-20s%-20s%-20s%-20s\n","xk", "f(xk)", "f'(xk)", "f''(xk)");
         for (int i = 0; i < 200; i++){
+            f_xk = functionSelector(selection, xk); // most recent f(xk)
+            if (Math.abs(f_xk_temp - f_xk) < 0.00001)
+                break;
+            f_xk_temp = f_xk;
             double prime = functionSelectorPrimes(selection, xk);
             double double_prime = functionSelectorDoublePrimes(selection, xk);
-            if (double_prime <= 0){
+            /*if (double_prime <= 0){
                 printRed("Newton's Method is diverging! (f‘‘(x) ≤ 0)\n");
                 break;
-            }
+            }*/
             xk1 = xk - (prime / double_prime);// x_(k+1)
-            System.out.format("%-15f%-15f%-15f%-15f\n",xk, f_xk, prime, double_prime);
-
+            System.out.format("%-20.4f%-20.4f%-20.4f%-20.4f\n",xk, f_xk, prime, double_prime);
             xk = xk1;
         }
         return xk1;
@@ -130,10 +135,10 @@ public class Main {
         switch (selection) {
             case 1: return Math.pow(x, 3) - (2 * x) - 5;
             case 2: return Math.exp(-x) - x;
-            case 3: return x * Math.sin(degToRad(x)) - 1;
+            case 3: return x * Math.sin(x) - 1;
             case 4: return Math.pow(x, 3) - (3 * Math.pow(x,2)) + 3 * x - 1;
             case 5: return 0.5 - x * Math.exp(-Math.pow(x, 2));
-            case 6: return Math.pow(x, 2) + 4 * Math.cos(degToRad(x));
+            case 6: return Math.pow(x, 2) + 4 * Math.cos(x);
             case 7: return Math.pow(x, 4) - 14 * Math.pow(x, 3) + 60 * Math.pow(x, 2) - 70 * x;
 
         }
@@ -144,10 +149,10 @@ public class Main {
         switch (selection){
             case 1: return 3 * Math.pow(x, 2) - 2;
             case 2: return -Math.exp(-x) - 1;
-            case 3: return Math.sin(degToRad(x)) + (x * Math.cos(degToRad(x)));
+            case 3: return Math.sin(x) + (x * Math.cos(x));
             case 4: return 3 * Math.pow(x, 2) - 6 * x + 3;
             case 5: return -Math.exp(-Math.pow(x, 2)) + 2 * Math.pow(x, 2) * Math.exp(-Math.pow(x, 2));
-            case 6: return (2 * x) - (4 * Math.sin(degToRad(x)));
+            case 6: return (2 * x) - (4 * Math.sin(x));
             case 7: return 4 * Math.pow(x, 3) - 42 * Math.pow(x, 2) + 120 * x - 70;
 
         }
@@ -156,15 +161,15 @@ public class Main {
 
     private static double functionSelectorDoublePrimes(int selection, double x){
         switch (selection){
+            case 1: return 6 * x;
+            case 2: return Math.exp(-x);
+            case 3: return Math.cos(x + Math.cos(x) - Math.sin(x) * x);
+            case 4: return 6 * x - 6;
             case 5: return 2 * x * (3 - 2 * Math.pow(x, 2)) * Math.exp(-Math.pow(x, 2));
-            case 6: return 2 - (4 * Math.cos(degToRad(x)));
+            case 6: return 2 - 4 * Math.cos(x);
             case 7: return 12 * Math.pow(x, 2) - 84 * x + 120;
         }
         return 0;
-    }
-
-    private static double degToRad(double num){
-        return (Math.PI / 180) * num;
     }
 
     private static void printRed(String x){
