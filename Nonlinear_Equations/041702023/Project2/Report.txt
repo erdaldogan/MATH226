@@ -1,0 +1,41 @@
+
+
+Erdal Sidal Dogan
+MEF University EE Engineering Department
+#041702023
+December 4, 2019
+
+
+MATH 226 - Numerical Methods For EE Engineers
+Assignment II - Nonlinear Equations & Optimization
+
+1-) Root Finding
+
+1a-) Bisection Method:
+
+	Most intuitive approach for solving an equation in f(x)=0 form. First the user chooses two points, a and b. Then, we evaluate the function at these points and check for the signs of f(a) and f(b). If the signs are different, it means there is a point where the function is zero(root) between the interval [a, b]. As we decide there is a root in our interval, we start the iterations in order to close the move a and b toward the root. In each iteration, we first determine the middle point of [a, b], which is 'm'. Then we compare the sign of f(m) with signs of f(a) and f(b). Whichever has the same sign with f(m), we shift that point to m. Therefore, at each iteration we are getting closer to root and shift a and b towards the root. We stop the iterations when we get close enough to the root, which we check by our error tolerance. 
+
+Bisection method is linearly convergent
+
+Equation x^3 - 2x - 5 solved with bisection: 2.0945515355986415
+Equation e^(-x) - x solved with secant method: 0.56719970703125
+Equation xsin(x) - 1 solved with secant method: 7.58056640625
+
+
+1b-) Secant Method
+
+	Little more advanced method comparing to Bisection. Just like bisection, we start with two initial assumptions for points x0 and x1. At each iteration, we are calculating the next x value, which I named as x2. x2 is the point where the tangent line that is crossing f(x0) and f(x1) crosses 0. If visualized, it can be seen that the x2 point will be close to the root of the function. At each iteration we calculate the x2, then x2 point becomes our new x1 point, likewise older x1 becomes x0 now. As we iterate the x2 point converges to the root. We terminate when we get close enough to the root, which is determined by our tolerance value.
+
+Secant method is superlinear convergent
+
+Equation x^3 - 2x - 5 solved with secant method: 2.0945587158203125
+Equation e^(-x) - x solved with secant method: 0.567143314100833
+Equation xsin(x) - 1 solved with secant method: 7.580453508432061
+
+
+2-) Optimizing
+
+2a-) Newton's Method (1-Dimensional)
+
+	In the newton's method, we start with initial guess xk. Then, we calculate the next point xk+ by the formula. For the next iteration we change the xk as previously calculated xk+ and make the calculations again for the new value. We keep iterating until the results of our calculations are converging to a certain number. If it is converging, we can say that we found our minimum value.
+	

@@ -63,8 +63,7 @@ public class Main {
                     return 0;
             }
         }
-        System.out.println("Enter tol");
-        double tolerance = new Scanner(System.in).nextDouble();
+        double tolerance = 0.0001;
         double error = 1; // difference between the f(a) & f(b), will converge to 0 zero as we get closer to the root
         System.out.format("%-15s%-15s%-15s%-15s\n","a", "f(a)", "b", "f(b)");
         while (error > tolerance){
@@ -187,6 +186,6 @@ public class Main {
     }
 
     private static double degToRad(double x){
-        return x;
+        return (Math.PI / 180 ) * x;
     }
 }
