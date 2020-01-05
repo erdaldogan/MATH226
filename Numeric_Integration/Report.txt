@@ -1,0 +1,26 @@
+
+Erdal Sidal Dogan
+MEF University EE Engineering Department
+#041702023
+January 5, 2019
+
+
+MATH 226 - Numerical Methods For EE Engineers
+Assignment III - Numerical Integration Approximation
+
+The programs approximates the the integral of two functions within the given interval.
+
+1-) Midpoint Rule
+
+As the name suggests, in this method first we find the value of the function at the midpoint of given interval. Assume given intervals are a & b. Then the midpoint is; m = (a+b)/2. We calculate the f(m) and then we assume there is a rectangular shape which has the height of f(m), and width of the (b - a) (length of interval). Roughly, we say that area of this rectangle is equal to area under the function curve. Intuitively, we can increase the accuracy of our assumption by increasing the number of rectangles, then summing up their areas. 
+
+
+2-) Trapezoid Rule
+
+Another method for approximating the integral of a function. In this method we draw a straight line from the value of the function at lower bound to the value at the upper bound. Assume lower & bounds are denoted with a and b, respectively. Then we draw a straight line from f(a) to f(b). Area under this straight line forms a trapezoid with such specs; height = (b - a), long base f(a) or f(b), whichever is greater and short base the other. Roughly, we say that area of this trapezoid is equal to area under the function curve. Consequently, approximated the integral. Intuitively, we can increase the accuracy of our assumption by increasing the number of trapezoids, then summing up their areas. 
+
+3-) Conclusion
+
+Demonstration of the both midpoint and trapezoid rules indicated that midpoint rule yields slightly more accurate results than trapezoid. However, the gap between the results is getting smaller as the number of rectangles and trapezoids increase.
+
+	
