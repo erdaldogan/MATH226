@@ -1,5 +1,6 @@
 
 1-) Open Terminal and navigate to location where 'Numerical_Integration.jar' is downloaded
+(041702023/Project3/Source/Numerical_Integration.jar)
 
 2-) Run the .jar file by running the command 'java -jar Numerical_Integration.jar'
 

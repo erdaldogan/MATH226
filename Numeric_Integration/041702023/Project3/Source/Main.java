@@ -36,12 +36,12 @@ public class Main {
     private static double midpointRule(double lower, double upper, int n, int functionSelect){
         double h = (upper - lower) / n; // step size
         double sum = 0;
-        double temp_lower = lower, temp_upper = temp_lower + h; // temp values will store lower and upper bounds for each step
-        for (int i = 1; i <= n ; i ++){
+        double temp_lower, temp_upper; // temp values will store lower and upper bounds for each step
+        for (double i = h; i <= upper; i += h){
+            temp_lower = i - h; // previous value of i
+            temp_upper = i;
             double midpoint = (temp_lower + temp_upper) / 2;
             sum += selectFunction(functionSelect, midpoint); // midpoint rule formula suggests
-            temp_lower = temp_upper;
-            temp_upper += h;
         }
         return h * sum; // midpoint rule formula
     }
@@ -49,14 +49,15 @@ public class Main {
     private static double trapezoidRule(double lower, double upper, int n, int functionSelect){
         double h = (upper - lower) / n; // step size
         double sum = 0;
-        double temp_lower = lower, temp_upper = lower + h; // temp values will store lower and upper bounds for each step
-        for (int i = 1; i <= n ; i++){
+        double temp_lower, temp_upper; // temp values will store lower and upper bounds for each step
+        for (double i = h; i <= upper; i += h){
+            temp_lower = i - h; // previous value of i
+            temp_upper = i;
+
             // trapezoid rule formula suggests
-            sum += (selectFunction(functionSelect, temp_lower) + selectFunction(functionSelect, temp_upper));
-            temp_lower = temp_upper;
-            temp_upper += h;
+            sum += (h / 2) * (selectFunction(functionSelect, temp_lower) + selectFunction(functionSelect, temp_upper));
         }
-        return (h / 2) * sum;
+        return sum;
     }
 
     private static double selectFunction(int select, double value){
