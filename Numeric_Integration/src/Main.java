@@ -64,7 +64,7 @@ public class Main {
             case 1: return 4 / (1 + Math.pow(value, 2));
             case 2:
                 if (value <=0) // avoid log(0) and negatives.
-                    value = 0.00001;
+                    value = 0.0000000001;
                 return Math.sqrt(value) * Math.log(value);
         }
         System.err.println("Function doesn't exist!"); // if user selects anything other than available functions
