@@ -137,7 +137,7 @@ public class Main {
         switch (selection) {
             case 1: return Math.pow(x, 3) - (2 * x) - 5;
             case 2: return Math.exp(-x) - x;
-            case 3: return x * Math.sin(degToRad(x)) - 1;
+            case 3: return x * Math.sin(x) - 1;
             case 4: return Math.pow(x, 3) - (3 * Math.pow(x,2)) + (3 * x) - 1;
             case 5: return 0.5 - x * Math.exp(-Math.pow(x, 2));
             case 6: return Math.pow(x, 2) + 4 * Math.cos(x);
@@ -151,10 +151,10 @@ public class Main {
         switch (selection){
             case 1: return 3 * Math.pow(x, 2) - 2;
             case 2: return -Math.exp(-x) - 1;
-            case 3: return Math.sin(degToRad(x)) + (x * Math.cos(degToRad(x)));
+            case 3: return Math.sin(x) + (x * Math.cos(x));
             case 4: return 3 * Math.pow(x, 2) - 6 * x + 3;
             case 5: return -Math.exp(-Math.pow(x, 2)) + 2 * Math.pow(x, 2) * Math.exp(-Math.pow(x, 2));
-            case 6: return (2 * x) - (4 * Math.sin(degToRad(x)));
+            case 6: return (2 * x) - (4 * Math.sin(x));
             case 7: return 4 * Math.pow(x, 3) - 42 * Math.pow(x, 2) + 120 * x - 70;
 
         }
@@ -165,10 +165,10 @@ public class Main {
         switch (selection){
             case 1: return 6 * x;
             case 2: return Math.exp(-x);
-            case 3: return Math.cos(degToRad(x)) + Math.cos(degToRad(x)) - Math.sin(degToRad(x)) * x;
+            case 3: return Math.cos(x) + Math.cos(x) - Math.sin(x) * x;
             case 4: return 6 * x - 6;
             case 5: return 2 * x * (3 - 2 * Math.pow(x, 2)) * Math.exp(-Math.pow(x, 2));
-            case 6: return 2 - 4 * Math.cos(degToRad(x));
+            case 6: return 2 - 4 * Math.cos(x);
             case 7: return 12 * Math.pow(x, 2) - 84 * x + 120;
         }
         return 0;
@@ -185,8 +185,9 @@ public class Main {
         final String ANSI_RESET  = "\u001B[0m";
         System.out.print(ANSI_GREEN + x + ANSI_RESET);
     }
-
+/*
     private static double degToRad(double x){
         return x;
     }
+    */
 }
